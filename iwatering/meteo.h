@@ -1,7 +1,18 @@
 
+/*
+ * 
+ * @author: Andrea Pagliarani
+ * @since: 25/07/2021
+ * 
+ * This is an Arduino project aimed at building an
+ * automated watering plant with an ESP8266
+ * 
+ */
+
+
 #include "arduino_secrets.h"
 #include <ESP8266HTTPClient.h>
-#include "Arduino_JSON.h"
+#include <ArduinoJson.h>
 
 
 const String SERVER_NAME = "http://api.openweathermap.org";
@@ -35,18 +46,15 @@ String getMeteo() {
 }
 
 bool isRaining(String meteoResponse) {
+
+  DynamicJsonDocument meteo(1024);
+  deserializeJson(meteo, meteoResponse);
   
-  JSONVar meteo = JSON.parse(meteoResponse);
-  if (JSON.typeof(meteo) == "undefined") {
-      Serial.println("Parsing input failed!");
-      return false;
-    } else {
-      JSONVar curStat = meteo["weather"][0]["main"];
-      Serial.println(curStat);
-      if (JSON.stringify(curStat) != "Rain") {
-        return false;
-      } else {
-        return true;
-      }
+  String weather = meteo["weather"][0]["main"];
+  if (!weather.equals("Rain") && !weather.equals("Thunderstorm")) {
+    return false;
+  } else {
+    return true;
   }
+  
 }
